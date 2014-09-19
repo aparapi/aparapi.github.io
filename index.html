@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Aparapi.github.io : ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Aparapi.github.io</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/aparapi">View on GitHub</a>
+
+          <h1 id="project_title">Aparapi.github.io</h1>
+          <h2 id="project_tagline"></h2>
+
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="what-is-aparapi" class="anchor" href="#what-is-aparapi"><span class="octicon octicon-link"></span></a>What is Aparapi?</h1>
+
+<p>Aparapi allows Java developers to take advantage of the compute power of GPU and APU devices by executing data parallel code fragments on the GPU rather than being confined to the local CPU. It does this by converting Java bytecode to OpenCL at runtime and executing on the GPU, if for any reason Aparapi can't execute on the GPU it will execute in a Java thread pool.</p>
+
+<p>We like to think that for the appropriate workload this extends Java's 'Write Once Run Anywhere' to include GPU devices.</p>
+
+<p>With Aparapi we can take a sequential loop such as this (which adds each element from inA and inB arrays and puts the result in result).</p>
+
+<p><code>final float inA[] = .... // get a float array of data from somewhere</code>
+<code>final float inB[] = .... // get a float array of data from somewhere (inA.length==inB.length)</code>
+<code>final float result = new float[inA.length];</code></p>
+
+<p><code>for (int i=0; i&lt;array.length; i++){</code>
+    <code>result[i]=intA[i]+inB[i];</code>
+<code>}</code></p>
+
+<p>And refactor the sequential loop to the following form:</p>
+
+<p><code>Kernel kernel = new Kernel(){</code>
+   <code>@Override public void run(){</code>
+      <code>int i= getGlobalId();</code>
+      <code>result[i]=intA[i]+inB[i];</code>
+   <code>}</code>
+<code>};</code>
+<code>Range range = Range.create(result.length);</code>
+<code>kernel.execute(range);</code></p>
+
+<p>In the above code we extend com.amd.aparapi.Kernel base class and override the Kernel.run() method to express our data parallel algorithm. We initiate the execution of the Kernel(over a specific range 0..results.length) using Kernel.execute(range).</p>
+
+<p>For folks following the new Java 8 lambda extensions. Here is how we expect the above Aparapi code to look when Java 8 arrives.</p>
+
+<p><code>Device.getBest().forEach(result.length, id -&gt; result[id] = intA[id]+inB[id]);</code></p>
+
+<p>Because we are also targeting the new "HSA Intermediate Language" <a href="https://hsafoundation.app.box.com/s/m6mrsjv8b7r50kqeyyal">https://hsafoundation.app.box.com/s/m6mrsjv8b7r50kqeyyal</a> in the 'lambda' branch, Aparapi users will now be able to access Strings (and other objects) from the Java heap. So given an array of Strings and ints we can extract the lengths in parallel.</p>
+
+<p><code>Device.hsa().forEach(strings.length, id -&gt; lengths[id] = strings[id].length());</code></p>
+
+<p>Note that because the example ''only'' works with HSA we need to select a HSA device.</p>
+
+<p>If you would like to download and try Aparapi follow the 'Downloads' link above and read the UsersGuide, alternatively if you would like to contribute or access the code you can check out the code from the SVN repository above and jump right in by reading the DevelopersGuide pages.</p>
+
+<h2>
+<a name="aparapi-in-the-news--upcoming-presentations" class="anchor" href="#aparapi-in-the-news--upcoming-presentations"><span class="octicon octicon-link"></span></a>Aparapi in the news + upcoming presentations</h2>
+
+<ul>
+<li>"GPU Acceleration of Interactive Large Scale Data Analytics Utilizing The Aparapi Framework" - Ryan LaMothe - AFDS</li>
+<li>"Aparapi: OpenCL GPU and Multi-Core CPU Heterogeneous Computing for Java" - Ryan LaMothe and Gary Frost - AFDS</li>
+<li>"Performance Evaluation of AMD-APARAPI Using Real World Applications" - Prakash Raghavendra - AFDS</li>
+<li>"Aparapi: An Open Source tool for extending the Java promise of ‘Write Once Run Anywhere’ to include the GPU" - Gary Frost - OSCON 7/18/2012</li>
+<li>Aparapi talk at DOSUG (Denver Open Source User Group) Sept 4th 2012</li>
+<li>Meetup meeting in Paris Sept 25th 2012 </li>
+</ul><h2>
+<a name="useful-links" class="anchor" href="#useful-links"><span class="octicon octicon-link"></span></a>Useful links</h2>
+
+<ul>
+<li>Quick Reference Guide</li>
+<li>2010 InfoQ Interview</li>
+<li>JavaOne 2010 Aparapi presentation</li>
+<li>AMD Fusion Developer Summit presentation</li>
+<li>AMD Fusion Developer Summit video</li>
+<li>Open Source Announcement at developer.amd.com</li>
+<li>Aparapi Mandlebrot demo on YouTube</li>
+<li>Witold Bolt's "The smell of fresh coffee: Aparapi - Java on the GPU!"</li>
+<li>Some interesting feedback on Aparapi from this blogger 'a hackers craic'</li>
+<li>A nice blog showing how to implement an option volatility surface using Aparapi</li>
+<li>Here is Eduardo Dudu's Game of Life extensions including links to the code Really nice graphics!</li>
+<li>Here also is a Spanish Blog</li>
+<li>Some really good performance analysis of algorithms implemented using Aparapi</li>
+<li>Nice YouTube demo (Aparapi + JMonkeyEngine</li>
+<li>Another YouTube demo using Aparapi</li>
+<li>A nice blog describing one developers take on Aparapi</li>
+<li>Aparapi running on Nexus 4 Phone</li>
+<li>An attempt to use Aparapi for Neural Network applications</li>
+<li>A nice writeup of Aparapi from Tomas Zrybak </li>
+</ul><h2>
+<a name="similar-work" class="anchor" href="#similar-work"><span class="octicon octicon-link"></span></a>Similar Work</h2>
+
+<ul>
+<li>Peter Calvert's java-GPU has similar goals and offers a mechanism for converting Java code for use on the GPU</li>
+<li>Check out Peter's dissertation "Parallelisation of Java for Graphics Processors" which can be found here </li>
+<li>Marco Hutter's Java bindings for CUDA</li>
+<li>Marco Hutter's Java bindings for OpenCL</li>
+<li>Ian Wetherbee's Java acceleration project - creates accelerated code from Java (currently C code and native Android - but CUDA creation planned)</li>
+<li>"Rootbeer: Seamlessly using GPUs from Java" by Philip C. Pratt-Szeliga </li>
+</ul><h2>
+<a name="wiki-pages" class="anchor" href="#wiki-pages"><span class="octicon octicon-link"></span></a>Wiki Pages</h2>
+
+<ul>
+<li>User’s Guide UsersGuide</li>
+<li>Developer’s Guide DevelopersGuide, for developers who want to build Aparapi or contribute to the project</li>
+<li>Frequently Asked Questions FrequentlyAskedQuestions </li>
+</ul><h2>
+<a name="about-the-name" class="anchor" href="#about-the-name"><span class="octicon octicon-link"></span></a>About the name</h2>
+
+<p>Aparapi is just a contraction of "A PARallel API"</p>
+
+<p>However... "Apa rapi" in Indonesian (the language spoken on the island of Java) translates to "What a neat...". So "Apa rapi Java Project" translates to "What a neat Java Project" How cool is that?</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
